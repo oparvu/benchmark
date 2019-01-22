@@ -432,6 +432,7 @@ struct Statistics {
 namespace internal {
 struct BenchmarkInstance;
 class ThreadTimer;
+class Papi;
 class ThreadManager;
 
 enum AggregationReportMode
@@ -668,7 +669,7 @@ class State {
 
  private:
   State(size_t max_iters, const std::vector<int64_t>& ranges, int thread_i,
-        int n_threads, internal::ThreadTimer* timer,
+        int n_threads, internal::ThreadTimer* timer, internal::Papi* papi,
         internal::ThreadManager* manager);
 
   void StartKeepRunning();
@@ -677,6 +678,7 @@ class State {
   bool KeepRunningInternal(size_t n, bool is_batch);
   void FinishKeepRunning();
   internal::ThreadTimer* timer_;
+  internal::Papi* papi_;
   internal::ThreadManager* manager_;
 
   friend struct internal::BenchmarkInstance;

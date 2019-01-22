@@ -50,6 +50,7 @@
 #include "string_util.h"
 #include "thread_manager.h"
 #include "thread_timer.h"
+#include "papi_wrapper.h"
 
 namespace benchmark {
 
@@ -108,7 +109,8 @@ BenchmarkReporter::Run CreateRunReport(
 void RunInThread(const BenchmarkInstance* b, size_t iters, int thread_id,
                  ThreadManager* manager) {
   internal::ThreadTimer timer;
-  State st = b->Run(iters, thread_id, &timer, manager);
+  internal::Papi papi(b->events);
+  State st = b->Run(iters, thread_id, &timer, &papi, manager);
   CHECK(st.iterations() >= st.max_iterations)
       << "Benchmark returned before State::KeepRunning() returned false!";
   {
@@ -120,6 +122,7 @@ void RunInThread(const BenchmarkInstance* b, size_t iters, int thread_id,
     results.manual_time_used += timer.manual_time_used();
     results.complexity_n += st.complexity_length_n();
     internal::Increment(&results.counters, st.counters);
+    papi.IncrementCounters(results.counters);
   }
   manager->NotifyThreadComplete();
 }
@@ -204,7 +207,7 @@ class BenchmarkRunner {
     // And run one thread here directly.
     // (If we were asked to run just one thread, we don't create new threads.)
     // Yes, we need to do this here *after* we start the separate threads.
-    RunInThread(&b, iters, 0, manager.get());
+	RunInThread(&b, iters, 0, manager.get());
 
     // The main thread has finished. Now let's wait for the other threads.
     manager->WaitForAllThreads();
@@ -318,7 +321,7 @@ class BenchmarkRunner {
       memory_manager->Start();
       std::unique_ptr<internal::ThreadManager> manager;
       manager.reset(new internal::ThreadManager(1));
-      RunInThread(&b, memory_iterations, 0, manager.get());
+	  RunInThread(&b, memory_iterations, 0, manager.get());
       manager->WaitForAllThreads();
       manager.reset();
 

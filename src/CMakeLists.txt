@@ -27,7 +27,7 @@ target_include_directories(benchmark PUBLIC
     )
 
 # Link threads.
-target_link_libraries(benchmark  ${BENCHMARK_CXX_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(benchmark  ${BENCHMARK_CXX_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} papi)
 find_library(LIBRT rt)
 if(LIBRT)
   target_link_libraries(benchmark ${LIBRT})

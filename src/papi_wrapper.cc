@@ -52,6 +52,7 @@ Papi::Papi(std::vector<int> events)
 
 Papi::~Papi()
 {
+  PAPI_cleanup_eventset(events_);
   PAPI_destroy_eventset(&events_);
 }
 
